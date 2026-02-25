@@ -647,6 +647,238 @@
     color: var(--primary);
     letter-spacing: 0.05em;
   }
+
+  /* ===== LIVE TICKER STYLES ===== */
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: linear-gradient(135deg, #E6FBF5, #D1FAF0);
+    color: #00A87A;
+    border: 1px solid rgba(0,200,150,0.4);
+    border-radius: 20px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    animation: liveGlow 2.5s infinite;
+  }
+  .live-badge.stale { background: #FFF4EF; color: #E85A2C; border-color: rgba(232,90,44,0.4); animation: none; }
+  .live-badge.loading { background: var(--yellow-bg); color: var(--yellow); border-color: rgba(245,158,11,0.4); animation: none; }
+  @keyframes liveGlow {
+    0%,100% { box-shadow: 0 0 0 0 rgba(0,200,150,0.3); }
+    50% { box-shadow: 0 0 0 4px rgba(0,200,150,0); }
+  }
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #00C896;
+    animation: pulse 1.5s infinite;
+  }
+  .live-badge.stale .live-dot { background: #E85A2C; animation: none; }
+  .live-badge.loading .live-dot { background: var(--yellow); animation: none; }
+
+  /* Elicio card live metrics */
+  .metric-live-wrap {
+    position: relative;
+  }
+  .metric-live-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.2rem;
+  }
+  .price-change-arrow {
+    font-size: 0.75rem;
+    font-weight: 800;
+    margin-left: 0.3rem;
+  }
+  .nasdaq-ticker-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0.4rem 0.7rem;
+    background: linear-gradient(135deg, var(--bg3), #F0FDF9);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    flex-wrap: wrap;
+  }
+  .ticker-symbol {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: 0.1em;
+  }
+  .ticker-price-main {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .ticker-change {
+    font-size: 0.6rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+  }
+  .ticker-change.up { color: var(--green); background: var(--green-bg); }
+  .ticker-change.down { color: var(--red); background: var(--red-bg); }
+  .ticker-change.flat { color: var(--yellow); background: var(--yellow-bg); }
+  .ticker-vol {
+    font-size: 0.55rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+  .skeleton-pulse {
+    background: linear-gradient(90deg, var(--border) 25%, #e8ecf5 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: skeleton 1.5s infinite;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  @keyframes skeleton {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .refresh-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.7rem;
+    color: var(--muted);
+    padding: 0.2rem;
+    transition: transform 0.3s;
+    line-height: 1;
+  }
+  .refresh-btn:hover { color: var(--primary); }
+  .refresh-btn.spinning { animation: spin 1s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .last-update-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.5rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    margin-top: 0.3rem;
+  }
+  .elicio-market-hours {
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .elicio-market-hours.open { color: var(--green); }
+  .elicio-market-hours.closed { color: var(--red); }
+  .elicio-market-hours.pre { color: var(--yellow); }
+
+
+  /* ===================================================
+     RESPONSIVE — Mobile-first breakpoints
+     =================================================== */
+
+  /* ── Large Desktop (≥ 1200px): already handled by base styles ── */
+
+  /* ── Medium (≤ 1100px): slightly tighter grid ── */
+  @media (max-width: 1100px) {
+    .container { padding: 1.5rem 1.5rem; }
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+    .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+    .startup-card:nth-child(3) { grid-column: span 2; max-width: 480px; justify-self: center; width: 100%; }
+  }
+
+  /* ── Tablet (≤ 860px) ── */
+  @media (max-width: 860px) {
+    .container { padding: 1rem 1rem; }
+
+    header {
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1.2rem 1.5rem;
+    }
+    .header-right { width: 100%; text-align: left; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+    .kpi-value { font-size: 1.5rem; }
+
+    .portfolio-grid { grid-template-columns: 1fr; }
+    .startup-card:nth-child(3) { grid-column: span 1; max-width: 100%; }
+
+    .runway-header,
+    .aircraft-row { grid-template-columns: 140px 1fr 110px; gap: 0.8rem; }
+
+    .charts-row { grid-template-columns: 1fr; }
+    .chart-inner { gap: 1.2rem; }
+
+    footer { flex-direction: column; gap: 0.4rem; text-align: center; }
+  }
+
+  /* ── Mobile (≤ 580px) ── */
+  @media (max-width: 580px) {
+    .container { padding: 0.8rem 0.8rem; }
+
+    header { padding: 1rem 1.2rem; }
+    .logo-img { width: 52px; height: 52px; }
+    .fund-title { font-size: 1.2rem; }
+
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+    .kpi-card { padding: 1.1rem 1rem; }
+    .kpi-value { font-size: 1.25rem; }
+    .kpi-icon-wrap { width: 32px; height: 32px; font-size: 0.9rem; margin-bottom: 0.7rem; }
+
+    .portfolio-grid { gap: 0.8rem; }
+    .startup-card { padding: 1.3rem; }
+    .card-metrics { gap: 0.6rem; }
+    .metric { padding: 0.6rem; }
+    .metric-value { font-size: 0.9rem; }
+
+    /* Runway chart: stack on small screens */
+    .runway-header { display: none; }
+    .aircraft-row {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+      padding: 0.8rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 0.8rem;
+    }
+    .aircraft-fill { height: 26px; font-size: 0.55rem; }
+    .aircraft-stats { text-align: left; display: flex; gap: 1rem; align-items: center; }
+    .aircraft-invested { margin-bottom: 0; }
+    .aircraft-current { font-size: 0.85rem; }
+
+    /* Ticker row wraps cleanly */
+    .nasdaq-ticker-row { gap: 0.4rem; }
+    .ticker-symbol { font-size: 0.6rem; }
+    .ticker-price-main { font-size: 0.75rem; }
+    .ticker-change { font-size: 0.55rem; }
+
+    .chart-inner { flex-direction: column; gap: 1rem; }
+    .pie-svg { width: 130px; height: 130px; }
+
+    .timeline-item { padding: 0.7rem 0.8rem; }
+    .timeline-year { font-size: 0.7rem; }
+
+    footer { padding: 1rem 0; }
+  }
+
+  /* ── Very small (≤ 380px) ── */
+  @media (max-width: 380px) {
+    .kpi-strip { grid-template-columns: 1fr; }
+    .fund-title { font-size: 1rem; }
+    .kpi-value { font-size: 1.1rem; }
+  }
+
+  /* ── Touch friendly interactive elements ── */
+  @media (hover: none) {
+    .startup-card:hover { transform: none; box-shadow: var(--shadow); }
+    .kpi-card:hover { transform: none; box-shadow: var(--shadow); }
+  }
+
 </style>
 </head>
 <body>
@@ -678,9 +910,9 @@
     </div>
     <div class="kpi-card">
       <div class="kpi-icon-wrap">💼</div>
-      <div class="kpi-value">$981K</div>
+      <div class="kpi-value" id="kpiPortfolioValue">$—</div>
       <div class="kpi-label">Valor Actual Portfolio</div>
-      <div class="kpi-delta down">↓ &minus;11.3% vs invertido</div>
+      <div class="kpi-delta down" id="kpiPortfolioDelta">↓ Calculando…</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-icon-wrap">🌍</div>
@@ -788,8 +1020,8 @@
       </div>
     </div>
 
-    <!-- ELICIO -->
-    <div class="startup-card" onclick="window.open('https://elicio.com/','_blank')">
+    <!-- ELICIO — LIVE NASDAQ DATA -->
+    <div class="startup-card" id="elicioCard" onclick="window.open('https://elicio.com/','_blank')">
       <div class="card-color-bar card-c3"></div>
       <div class="card-top">
         <div class="card-icon card-c3-bg">💊</div>
@@ -799,11 +1031,25 @@
         </div>
       </div>
       <div class="card-name">Elicio Therapeutics</div>
-      <div class="roi-chip down">↓ -68.2% ROI · Pérdida $253K</div>
+
+      <!-- Live Nasdaq ticker row -->
+      <div class="nasdaq-ticker-row" onclick="event.stopPropagation()">
+        <span class="ticker-symbol">ELTX</span>
+        <span class="ticker-price-main" id="eltxPriceDisplay"><span class="skeleton-pulse" style="width:48px;height:14px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span>
+        <span class="ticker-change flat" id="eltxChangeDisplay">···</span>
+        <span class="ticker-vol" id="eltxVolDisplay"></span>
+        <div id="liveBadge" class="live-badge loading" style="margin-left:auto">
+          <span class="live-dot"></span> Cargando
+        </div>
+        <button class="refresh-btn" id="refreshBtn" onclick="event.stopPropagation(); fetchELTX(true)" title="Actualizar">↻</button>
+      </div>
+
+      <div id="elicioRoiChip" class="roi-chip down">↓ — ROI · Cargando…</div>
+
       <div class="card-metrics">
         <div class="metric">
-          <div class="metric-label">Valoración</div>
-          <div class="metric-value green">$150M</div>
+          <div class="metric-label">Precio ELTX</div>
+          <div class="metric-value green" id="eltxPriceMetric"><span class="skeleton-pulse" style="width:40px;height:16px;">&nbsp;</span></div>
         </div>
         <div class="metric">
           <div class="metric-label">Capital Inv.</div>
@@ -815,20 +1061,27 @@
         </div>
         <div class="metric">
           <div class="metric-label">Valor Actual</div>
-          <div class="metric-value red">$118K</div>
+          <div class="metric-value" id="eltxValorActual"><span class="skeleton-pulse" style="width:44px;height:16px;">&nbsp;</span></div>
         </div>
       </div>
+
       <div class="equity-bar-wrap">
         <div class="equity-bar-header"><span>Participación</span><span style="color:var(--green)">0.30%</span></div>
         <div class="equity-bar-track">
           <div class="equity-bar-fill fill-c3" data-width="3"></div>
         </div>
       </div>
-      <div class="card-footer">
-        <div class="status-badge"><div class="status-dot"></div> Scaling</div>
+
+      <div class="last-update-row">
+        <span id="eltxLastUpdate">Conectando con Nasdaq…</span>
+        <span id="eltxMarketHours" class="elicio-market-hours"></span>
+      </div>
+
+      <div class="card-footer" style="margin-top:0.6rem">
+        <div class="status-badge"><div class="status-dot"></div> Scaling · Nasdaq</div>
         <div class="card-links">
           <a href="https://elicio.com/" target="_blank" class="card-link web" onclick="event.stopPropagation()" style="color:var(--green);background:var(--green-bg);border-color:rgba(0,200,150,0.2)">🌐 Web</a>
-          <a href="https://www.nasdaq.com/es/market-activity/stocks/eltx" target="_blank" class="card-link nasdaq" onclick="event.stopPropagation()">📈 ELTX</a>
+          <a href="https://finance.yahoo.com/quote/ELTX" target="_blank" class="card-link nasdaq" onclick="event.stopPropagation()">📈 ELTX</a>
         </div>
       </div>
     </div>
@@ -878,12 +1131,12 @@
           <div class="aircraft-ticker">Therapeutics · ELTX · Nasdaq</div>
         </div>
         <div class="aircraft-track">
-          <div class="aircraft-fill track-loss" data-width="32">-68.2% ✈️</div>
+          <div class="aircraft-fill track-loss" id="eltxRunwayBar" data-width="32">— ✈️</div>
         </div>
         <div class="aircraft-stats">
           <div class="aircraft-invested">Inv. $371,000</div>
-          <div class="aircraft-current loss">$118,000</div>
-          <div class="aircraft-roi loss">-$253K</div>
+          <div class="aircraft-current loss" id="eltxRunwayCurrent">—</div>
+          <div class="aircraft-roi loss" id="eltxRunwayRoi">—</div>
         </div>
       </div>
     </div>
@@ -954,73 +1207,372 @@
 </div>
 
 <script>
+// ── Date ─────────────────────────────────────────────────────────────────────
 document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-ES', {year:'numeric',month:'long',day:'numeric'});
 
-// Animate bars
-const observer = new IntersectionObserver((entries) => {
+// ── Animate bars ──────────────────────────────────────────────────────────────
+const barObserver = new IntersectionObserver((entries) => {
   entries.forEach(e => {
-    if(e.isIntersecting) {
+    if (e.isIntersecting) {
       e.target.querySelectorAll('.equity-bar-fill,.aircraft-fill').forEach(bar => {
         const w = bar.getAttribute('data-width');
-        if(w) bar.style.width = w + '%';
+        if (w) bar.style.width = w + '%';
       });
     }
   });
-},{threshold:0.2});
-document.querySelectorAll('.startup-card,.runway-chart').forEach(el => observer.observe(el));
+}, { threshold: 0.2 });
+document.querySelectorAll('.startup-card,.runway-chart').forEach(el => barObserver.observe(el));
 setTimeout(() => {
   document.querySelectorAll('.equity-bar-fill,.aircraft-fill').forEach(bar => {
     const w = bar.getAttribute('data-width');
-    if(w) bar.style.width = w + '%';
+    if (w) bar.style.width = w + '%';
   });
-}, 500);
+}, 600);
 
-// Pie chart
-(function(){
+// ── Pie chart ─────────────────────────────────────────────────────────────────
+(function () {
   const data = [
-    {pct:34.8, color:'#2D5BE3'},
-    {pct:31.6, color:'#A855F7'},
-    {pct:33.5, color:'#00C896'},
+    { pct: 34.8, color: '#2D5BE3' },
+    { pct: 31.6, color: '#A855F7' },
+    { pct: 33.5, color: '#00C896' },
   ];
   const svg = document.getElementById('pieChart');
-  const cx=80,cy=80,r=68,ir=32;
-  let start=0;
+  const cx = 80, cy = 80, r = 68, ir = 32;
+  let start = 0;
   data.forEach(d => {
-    const angle = (d.pct/100)*360;
+    const angle = (d.pct / 100) * 360;
     const gap = 2;
-    const startRad = (start-90)*Math.PI/180;
-    const endRad = (start+angle-gap-90)*Math.PI/180;
-    const x1=cx+r*Math.cos(startRad),y1=cy+r*Math.sin(startRad);
-    const x2=cx+r*Math.cos(endRad),y2=cy+r*Math.sin(endRad);
-    const ix1=cx+ir*Math.cos(startRad),iy1=cy+ir*Math.sin(startRad);
-    const ix2=cx+ir*Math.cos(endRad),iy2=cy+ir*Math.sin(endRad);
-    const large = angle>180?1:0;
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d',`M${ix1},${iy1} L${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${ix2},${iy2} A${ir},${ir} 0 ${large} 0 ${ix1},${iy1} Z`);
+    const startRad = (start - 90) * Math.PI / 180;
+    const endRad = (start + angle - gap - 90) * Math.PI / 180;
+    const x1 = cx + r * Math.cos(startRad), y1 = cy + r * Math.sin(startRad);
+    const x2 = cx + r * Math.cos(endRad), y2 = cy + r * Math.sin(endRad);
+    const ix1 = cx + ir * Math.cos(startRad), iy1 = cy + ir * Math.sin(startRad);
+    const ix2 = cx + ir * Math.cos(endRad), iy2 = cy + ir * Math.sin(endRad);
+    const large = angle > 180 ? 1 : 0;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M${ix1},${iy1} L${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${ix2},${iy2} A${ir},${ir} 0 ${large} 0 ${ix1},${iy1} Z`);
     path.setAttribute('fill', d.color);
-    path.style.opacity='0.9';
-    path.style.transition='opacity 0.2s, transform 0.2s';
-    path.style.transformOrigin='80px 80px';
-    path.addEventListener('mouseenter',()=>{ path.style.opacity='1'; path.style.transform='scale(1.03)'; });
-    path.addEventListener('mouseleave',()=>{ path.style.opacity='0.9'; path.style.transform='scale(1)'; });
+    path.style.opacity = '0.9';
+    path.style.transition = 'opacity 0.2s, transform 0.2s';
+    path.style.transformOrigin = '80px 80px';
+    path.addEventListener('mouseenter', () => { path.style.opacity = '1'; path.style.transform = 'scale(1.03)'; });
+    path.addEventListener('mouseleave', () => { path.style.opacity = '0.9'; path.style.transform = 'scale(1)'; });
     svg.appendChild(path);
     start += angle;
   });
-  const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-  t.setAttribute('x',cx);t.setAttribute('y',cy+4);
-  t.setAttribute('text-anchor','middle');
-  t.setAttribute('font-family','Syne,sans-serif');
-  t.setAttribute('font-size','13');t.setAttribute('font-weight','800');
-  t.setAttribute('fill','#0F1C3F');t.textContent='$1.1M';
+  const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  t.setAttribute('x', cx); t.setAttribute('y', cy + 4);
+  t.setAttribute('text-anchor', 'middle');
+  t.setAttribute('font-family', 'Syne,sans-serif');
+  t.setAttribute('font-size', '13'); t.setAttribute('font-weight', '800');
+  t.setAttribute('fill', '#0F1C3F'); t.textContent = '$1.1M';
   svg.appendChild(t);
-  const t2 = document.createElementNS('http://www.w3.org/2000/svg','text');
-  t2.setAttribute('x',cx);t2.setAttribute('y',cy+16);
-  t2.setAttribute('text-anchor','middle');
-  t2.setAttribute('font-family','Inter,sans-serif');
-  t2.setAttribute('font-size','7');
-  t2.setAttribute('fill','#8895BB');t2.textContent='INVERTIDO';
+  const t2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  t2.setAttribute('x', cx); t2.setAttribute('y', cy + 16);
+  t2.setAttribute('text-anchor', 'middle');
+  t2.setAttribute('font-family', 'Inter,sans-serif');
+  t2.setAttribute('font-size', '7');
+  t2.setAttribute('fill', '#8895BB'); t2.textContent = 'INVERTIDO';
   svg.appendChild(t2);
 })();
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  ELTX LIVE DATA — Debugged & Robust
+// ═════════════════════════════════════════════════════════════════════════════
+const ELTX_SHARES     = 14668;
+const ELTX_INVESTED   = 371000;
+const OTHER_INVESTED  = 385000 + 350000;   // Oncoheroes + Astrocyte
+const OTHER_CURRENT   = 513000 + 350000;   // Oncoheroes + Astrocyte valores actuales
+const AUTO_REFRESH_MS = 90000;             // 90 s entre refreshes automáticos
+
+let lastKnownData  = null;   // { price, changeAmt, changePct, volume, timestamp }
+let refreshTimer   = null;
+let fetchAttempt   = 0;
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function fmt(n, dec = 2) {
+  return Number(n).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+function fmtMoney(n) {
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  if (abs >= 1e6) return sign + '$' + fmt(abs / 1e6, 2) + 'M';
+  if (abs >= 1e3) return sign + '$' + fmt(abs / 1e3, 1) + 'K';
+  return sign + '$' + fmt(abs, 0);
+}
+function isMarketOpen() {
+  try {
+    const ny   = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const day  = ny.getDay();
+    const mins = ny.getHours() * 60 + ny.getMinutes();
+    if (day === 0 || day === 6) return 'closed';
+    if (mins >= 570 && mins < 960) return 'open';
+    if (mins >= 240 && mins < 570) return 'pre';
+    if (mins >= 960 && mins < 1200) return 'post';
+  } catch (_) {}
+  return 'closed';
+}
+function setEl(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+function setLiveBadge(state) {
+  const b = document.getElementById('liveBadge');
+  if (!b) return;
+  const MAP = {
+    loading: { cls: 'loading', color: '#F59E0B', label: 'Cargando' },
+    live:    { cls: '',        color: '#00C896', label: 'EN VIVO'  },
+    stale:   { cls: 'stale',   color: '#E85A2C', label: 'Último dato' },
+    error:   { cls: 'stale',   color: '#E85A2C', label: 'Sin conexión' },
+  };
+  const s = MAP[state] || MAP.loading;
+  b.className = ('live-badge ' + s.cls).trim();
+  b.innerHTML = `<span class="live-dot" style="background:${s.color}"></span> ${s.label}`;
+}
+
+// ── UI updater ────────────────────────────────────────────────────────────
+function updateElicioUI(price, changeAmt, changePct, volume, dataTimestamp, isFresh) {
+  const valorActual = price * ELTX_SHARES;
+  const ganancia    = valorActual - ELTX_INVESTED;
+  const roiPct      = (ganancia / ELTX_INVESTED) * 100;
+  const priceStr    = '$' + fmt(price, 2);
+
+  // Precio principal
+  const priceDisp = document.getElementById('eltxPriceDisplay');
+  if (priceDisp) priceDisp.innerHTML = `<strong>${priceStr}</strong>`;
+  setEl('eltxPriceMetric', priceStr);
+
+  // Variación
+  const chgEl = document.getElementById('eltxChangeDisplay');
+  if (chgEl) {
+    const sign = changePct >= 0 ? '+' : '';
+    chgEl.textContent = `${sign}${fmt(changePct, 2)}% (${sign}${fmt(changeAmt, 3)})`;
+    chgEl.className   = 'ticker-change ' + (changePct > 0 ? 'up' : changePct < 0 ? 'down' : 'flat');
+  }
+
+  // Volumen
+  if (volume > 0) {
+    const v = volume >= 1e6 ? fmt(volume / 1e6, 2) + 'M'
+            : volume >= 1e3 ? Math.round(volume / 1e3) + 'K'
+            : String(volume);
+    setEl('eltxVolDisplay', 'Vol: ' + v);
+  }
+
+  // Valor actual
+  const valEl = document.getElementById('eltxValorActual');
+  if (valEl) {
+    valEl.textContent = fmtMoney(valorActual);
+    valEl.className   = 'metric-value ' + (roiPct >= 0 ? 'green' : 'red');
+  }
+
+  // ROI chip
+  const roiEl = document.getElementById('elicioRoiChip');
+  if (roiEl) {
+    const dir   = roiPct >= 0 ? '↑' : '↓';
+    const label = roiPct >= 0 ? 'Beneficio' : 'Pérdida';
+    roiEl.textContent = `${dir} ${roiPct >= 0 ? '+' : ''}${fmt(roiPct, 1)}% ROI · ${label} ${fmtMoney(Math.abs(ganancia))}`;
+    roiEl.className   = 'roi-chip ' + (roiPct >= 0 ? 'up' : 'down');
+  }
+
+  // Runway row
+  const runwayCur = document.getElementById('eltxRunwayCurrent');
+  const runwayRoi = document.getElementById('eltxRunwayRoi');
+  const runwayBar = document.getElementById('eltxRunwayBar');
+  if (runwayCur) {
+    runwayCur.textContent = fmtMoney(valorActual);
+    runwayCur.className   = 'aircraft-current ' + (roiPct >= 0 ? 'gain' : 'loss');
+  }
+  if (runwayRoi) {
+    runwayRoi.textContent = (ganancia >= 0 ? '+' : '') + fmtMoney(ganancia);
+    runwayRoi.className   = 'aircraft-roi ' + (roiPct >= 0 ? 'gain' : 'loss');
+  }
+  if (runwayBar) {
+    const bw = Math.max(5, Math.min(95, 50 + roiPct / 2));
+    runwayBar.setAttribute('data-width', bw.toFixed(0));
+    runwayBar.style.width = bw.toFixed(0) + '%';
+    runwayBar.textContent  = (roiPct >= 0 ? '+' : '') + fmt(roiPct, 1) + '% ✈️';
+    runwayBar.className    = 'aircraft-fill ' + (roiPct >= 0 ? 'track-gain' : 'track-loss');
+  }
+
+  // KPI Portfolio total
+  const totalVal = OTHER_CURRENT + valorActual;
+  const totalInv = OTHER_INVESTED + ELTX_INVESTED;
+  const totalRoi = ((totalVal - totalInv) / totalInv) * 100;
+  const kpiVal   = document.getElementById('kpiPortfolioValue');
+  const kpiDelta = document.getElementById('kpiPortfolioDelta');
+  if (kpiVal) kpiVal.textContent = totalVal >= 1e6 ? '$' + fmt(totalVal / 1e6, 2) + 'M' : '$' + Math.round(totalVal / 1e3) + 'K';
+  if (kpiDelta) {
+    kpiDelta.textContent = (totalRoi >= 0 ? '↑ +' : '↓ ') + fmt(totalRoi, 1) + '% vs invertido';
+    kpiDelta.className   = 'kpi-delta ' + (totalRoi >= 0 ? 'up' : 'down');
+  }
+
+  // Timestamp
+  let tsStr = '—';
+  if (dataTimestamp) {
+    try {
+      tsStr = new Date(dataTimestamp * 1000).toLocaleString('es-ES', {
+        timeZone: 'America/New_York', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      }) + ' NY';
+    } catch (_) { tsStr = new Date(dataTimestamp * 1000).toLocaleTimeString(); }
+  }
+  setEl('eltxLastUpdate', 'Act: ' + tsStr);
+
+  // Market hours indicator
+  const mktStatus = isMarketOpen();
+  const mktEl = document.getElementById('eltxMarketHours');
+  if (mktEl) {
+    const LABELS = { open: '● Abierto', pre: '◐ Pre-mkt', post: '◑ Post-mkt', closed: '○ Cerrado' };
+    mktEl.textContent = LABELS[mktStatus] || '';
+    mktEl.className   = 'elicio-market-hours ' + (mktStatus === 'open' ? 'open' : mktStatus === 'closed' ? 'closed' : 'pre');
+  }
+
+  setLiveBadge(isFresh ? 'live' : 'stale');
+  lastKnownData = { price, changeAmt, changePct, volume, timestamp: dataTimestamp };
+}
+
+// ── Parsing helpers (defensive) ──────────────────────────────────────────
+function parseYahooV8(raw) {
+  // raw.chart.result[0]
+  const result = raw?.chart?.result?.[0];
+  if (!result) throw new Error('No chart result');
+  const meta = result.meta;
+  if (!meta) throw new Error('No meta');
+  const price = meta.regularMarketPrice ?? meta.postMarketPrice ?? meta.preMarketPrice;
+  if (!price || price <= 0) throw new Error('Price is zero or missing: ' + JSON.stringify(meta).slice(0, 200));
+  const prev      = meta.chartPreviousClose ?? meta.previousClose ?? meta.regularMarketPreviousClose ?? price;
+  const changeAmt = price - prev;
+  const changePct = prev > 0 ? (changeAmt / prev) * 100 : 0;
+  const volume    = meta.regularMarketVolume ?? 0;
+  const ts        = meta.regularMarketTime ?? Math.floor(Date.now() / 1000);
+  return { price, changeAmt, changePct, volume, ts };
+}
+
+function parseYahooV10(raw) {
+  // raw.quoteSummary.result[0].price
+  const p = raw?.quoteSummary?.result?.[0]?.price;
+  if (!p) throw new Error('No price object in v10');
+  const price = p.regularMarketPrice?.raw ?? p.postMarketPrice?.raw;
+  if (!price || price <= 0) throw new Error('v10 price missing');
+  const prev      = p.regularMarketPreviousClose?.raw ?? price;
+  const changeAmt = p.regularMarketChange?.raw ?? (price - prev);
+  const changePct = p.regularMarketChangePercent?.raw ? p.regularMarketChangePercent.raw * 100 : (changeAmt / prev) * 100;
+  const volume    = p.regularMarketVolume?.raw ?? 0;
+  const ts        = p.regularMarketTime ?? Math.floor(Date.now() / 1000);
+  return { price, changeAmt, changePct, volume, ts };
+}
+
+// ── Fetch strategies ─────────────────────────────────────────────────────
+// Each strategy: { name, buildUrl(sym), parse(json) }
+const STRATEGIES = [
+  // 1. allorigins → Yahoo v8
+  {
+    name: 'allorigins/v8',
+    buildUrl: sym => 'https://api.allorigins.win/get?url=' + encodeURIComponent(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d&includePrePost=true`
+    ),
+    parse: json => {
+      const raw = json.contents ? JSON.parse(json.contents) : json;
+      return parseYahooV8(raw);
+    }
+  },
+  // 2. allorigins → Yahoo v10 (quoteSummary / price module)
+  {
+    name: 'allorigins/v10',
+    buildUrl: sym => 'https://api.allorigins.win/get?url=' + encodeURIComponent(
+      `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${sym}?modules=price`
+    ),
+    parse: json => {
+      const raw = json.contents ? JSON.parse(json.contents) : json;
+      return parseYahooV10(raw);
+    }
+  },
+  // 3. corsproxy.io → Yahoo v8
+  {
+    name: 'corsproxy/v8',
+    buildUrl: sym => 'https://corsproxy.io/?' + encodeURIComponent(
+      `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d&includePrePost=true`
+    ),
+    parse: json => parseYahooV8(json)
+  },
+  // 4. corsproxy.io → Yahoo v10
+  {
+    name: 'corsproxy/v10',
+    buildUrl: sym => 'https://corsproxy.io/?' + encodeURIComponent(
+      `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${sym}?modules=price`
+    ),
+    parse: json => parseYahooV10(json)
+  },
+  // 5. allorigins → alternative Yahoo endpoint (no prefix)
+  {
+    name: 'allorigins/v8-q2',
+    buildUrl: sym => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(
+      `https://query2.finance.yahoo.com/v8/finance/chart/${sym}`
+    ),
+    parse: json => parseYahooV8(json)
+  },
+];
+
+async function tryStrategy(strategy, symbol, timeout = 9000) {
+  const url = strategy.buildUrl(symbol);
+  const ctrl = new AbortController();
+  const tid  = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tid);
+    if (!res.ok) throw new Error(`HTTP ${res.status} from ${strategy.name}`);
+    const json = await res.json();
+    const data = strategy.parse(json);
+    console.info(`[ELTX] ✓ ${strategy.name} → $${data.price}`);
+    return data;
+  } finally {
+    clearTimeout(tid);
+  }
+}
+
+async function fetchELTX(manual = false) {
+  const btn = document.getElementById('refreshBtn');
+  if (btn) btn.classList.add('spinning');
+  setLiveBadge('loading');
+  fetchAttempt++;
+  const attempt = fetchAttempt;
+
+  let success = false;
+  for (const strategy of STRATEGIES) {
+    if (attempt !== fetchAttempt) break; // a newer call started
+    try {
+      const { price, changeAmt, changePct, volume, ts } = await tryStrategy(strategy, 'ELTX');
+      if (attempt !== fetchAttempt) break;
+      const isFresh = isMarketOpen() !== 'closed';
+      updateElicioUI(price, changeAmt, changePct, volume, ts, isFresh || manual);
+      success = true;
+      break;
+    } catch (err) {
+      console.warn(`[ELTX] ✗ ${strategy.name}:`, err.message);
+    }
+  }
+
+  if (!success && attempt === fetchAttempt) {
+    if (lastKnownData) {
+      setLiveBadge('stale');
+      setEl('eltxLastUpdate', 'Sin conexión — mostrando último dato conocido');
+    } else {
+      setLiveBadge('error');
+      setEl('eltxLastUpdate', 'No se pudo obtener precio de Yahoo Finance');
+      // Fallback estático mientras se depura
+      updateElicioUI(8.04, 0, 0, 0, null, false);
+    }
+  }
+
+  if (btn) btn.classList.remove('spinning');
+
+  // Auto-refresh schedule
+  if (refreshTimer) clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(() => fetchELTX(false), AUTO_REFRESH_MS);
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+fetchELTX(true);
 </script>
 </body>
 </html>
