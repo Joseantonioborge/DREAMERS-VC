@@ -879,6 +879,77 @@
     .kpi-card:hover { transform: none; box-shadow: var(--shadow); }
   }
 
+
+  /* ── Market stats strip (Market Cap + Day's Range) ── */
+  .market-stats-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 0.55rem;
+  }
+  .market-stat {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.45rem 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .market-stat-label {
+    font-size: 0.48rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .market-stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .market-stat-value .range-low  { color: var(--red); }
+  .market-stat-value .range-high { color: var(--green); }
+  .market-stat-value .range-sep  { color: var(--muted); margin: 0 0.2rem; }
+  .range-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.2rem;
+  }
+  .range-bar-track {
+    flex: 1;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red-bg) 0%, var(--green-bg) 100%);
+    border-radius: 2px;
+    position: relative;
+    overflow: visible;
+  }
+  .range-bar-cursor {
+    position: absolute;
+    top: -3px;
+    width: 3px;
+    height: 9px;
+    background: var(--primary);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: left 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 0 4px rgba(45,91,227,0.5);
+  }
+  .skeleton-pulse {
+    background: linear-gradient(90deg, var(--border) 25%, #e8ecf5 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: skeleton 1.5s infinite;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  @keyframes skeleton {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
 </style>
 </head>
 <body>
@@ -1042,6 +1113,29 @@
           <span class="live-dot"></span> Cargando
         </div>
         <button class="refresh-btn" id="refreshBtn" onclick="event.stopPropagation(); fetchELTX(true)" title="Actualizar">↻</button>
+      </div>
+
+      <!-- Market Cap + Day's Range strip -->
+      <div class="market-stats-strip" onclick="event.stopPropagation()">
+        <div class="market-stat">
+          <span class="market-stat-label">Market Cap</span>
+          <span class="market-stat-value" id="eltxMarketCap">
+            <span class="skeleton-pulse" style="width:50px;height:12px;">&nbsp;</span>
+          </span>
+        </div>
+        <div class="market-stat">
+          <span class="market-stat-label">Day's Range</span>
+          <span class="market-stat-value" id="eltxDayRange">
+            <span class="skeleton-pulse" style="width:80px;height:12px;">&nbsp;</span>
+          </span>
+          <div class="range-bar-wrap">
+            <span style="font-size:0.45rem;color:var(--muted)" id="eltxRangeLow">—</span>
+            <div class="range-bar-track">
+              <div class="range-bar-cursor" id="eltxRangeCursor" style="left:50%"></div>
+            </div>
+            <span style="font-size:0.45rem;color:var(--muted)" id="eltxRangeHigh">—</span>
+          </div>
+        </div>
       </div>
 
       <div id="elicioRoiChip" class="roi-chip down">↓ — ROI · Cargando…</div>
@@ -1331,7 +1425,7 @@ function setLiveBadge(state) {
 }
 
 // ── UI updater ────────────────────────────────────────────────────────────
-function updateElicioUI(price, changeAmt, changePct, volume, dataTimestamp, isFresh) {
+function updateElicioUI(price, changeAmt, changePct, volume, dataTimestamp, isFresh, marketCap, dayLow, dayHigh) {
   const valorActual = price * ELTX_SHARES;
   const ganancia    = valorActual - ELTX_INVESTED;
   const roiPct      = (ganancia / ELTX_INVESTED) * 100;
@@ -1427,6 +1521,42 @@ function updateElicioUI(price, changeAmt, changePct, volume, dataTimestamp, isFr
     mktEl.className   = 'elicio-market-hours ' + (mktStatus === 'open' ? 'open' : mktStatus === 'closed' ? 'closed' : 'pre');
   }
 
+
+  // ── Market Cap ──────────────────────────────────────────────────────────
+  const mcEl = document.getElementById('eltxMarketCap');
+  if (mcEl) {
+    if (marketCap && marketCap > 0) {
+      const mc = marketCap >= 1e9 ? '$' + fmt(marketCap / 1e9, 2) + 'B'
+               : marketCap >= 1e6 ? '$' + fmt(marketCap / 1e6, 1) + 'M'
+               : '$' + fmt(marketCap / 1e3, 0) + 'K';
+      mcEl.textContent = mc;
+    } else {
+      mcEl.textContent = '—';
+    }
+  }
+
+  // ── Day's Range ─────────────────────────────────────────────────────────
+  const drEl     = document.getElementById('eltxDayRange');
+  const cursorEl = document.getElementById('eltxRangeCursor');
+  const lowEl    = document.getElementById('eltxRangeLow');
+  const highEl   = document.getElementById('eltxRangeHigh');
+  if (drEl) {
+    if (dayLow && dayHigh && dayLow > 0 && dayHigh > 0) {
+      drEl.innerHTML =
+        `<span class="range-low">$${fmt(dayLow, 2)}</span>` +
+        `<span class="range-sep">—</span>` +
+        `<span class="range-high">$${fmt(dayHigh, 2)}</span>`;
+      if (lowEl)  lowEl.textContent  = '$' + fmt(dayLow, 2);
+      if (highEl) highEl.textContent = '$' + fmt(dayHigh, 2);
+      if (cursorEl && dayHigh > dayLow) {
+        const pct = Math.max(2, Math.min(98, ((price - dayLow) / (dayHigh - dayLow)) * 100));
+        cursorEl.style.left = pct + '%';
+      }
+    } else {
+      drEl.textContent = '—';
+    }
+  }
+
   setLiveBadge(isFresh ? 'live' : 'stale');
   lastKnownData = { price, changeAmt, changePct, volume, timestamp: dataTimestamp };
 }
@@ -1445,7 +1575,10 @@ function parseYahooV8(raw) {
   const changePct = prev > 0 ? (changeAmt / prev) * 100 : 0;
   const volume    = meta.regularMarketVolume ?? 0;
   const ts        = meta.regularMarketTime ?? Math.floor(Date.now() / 1000);
-  return { price, changeAmt, changePct, volume, ts };
+  const marketCap = meta.marketCap ?? null;
+  const dayLow    = meta.regularMarketDayLow ?? null;
+  const dayHigh   = meta.regularMarketDayHigh ?? null;
+  return { price, changeAmt, changePct, volume, ts, marketCap, dayLow, dayHigh };
 }
 
 function parseYahooV10(raw) {
@@ -1459,7 +1592,10 @@ function parseYahooV10(raw) {
   const changePct = p.regularMarketChangePercent?.raw ? p.regularMarketChangePercent.raw * 100 : (changeAmt / prev) * 100;
   const volume    = p.regularMarketVolume?.raw ?? 0;
   const ts        = p.regularMarketTime ?? Math.floor(Date.now() / 1000);
-  return { price, changeAmt, changePct, volume, ts };
+  const marketCap = p.marketCap?.raw ?? null;
+  const dayLow    = p.regularMarketDayLow?.raw ?? null;
+  const dayHigh   = p.regularMarketDayHigh?.raw ?? null;
+  return { price, changeAmt, changePct, volume, ts, marketCap, dayLow, dayHigh };
 }
 
 // ── Fetch strategies ─────────────────────────────────────────────────────
@@ -1480,7 +1616,7 @@ const STRATEGIES = [
   {
     name: 'allorigins/v10',
     buildUrl: sym => 'https://api.allorigins.win/get?url=' + encodeURIComponent(
-      `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${sym}?modules=price`
+      `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${sym}?modules=price,summaryDetail`
     ),
     parse: json => {
       const raw = json.contents ? JSON.parse(json.contents) : json;
@@ -1499,7 +1635,7 @@ const STRATEGIES = [
   {
     name: 'corsproxy/v10',
     buildUrl: sym => 'https://corsproxy.io/?' + encodeURIComponent(
-      `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${sym}?modules=price`
+      `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${sym}?modules=price,summaryDetail`
     ),
     parse: json => parseYahooV10(json)
   },
@@ -1541,10 +1677,10 @@ async function fetchELTX(manual = false) {
   for (const strategy of STRATEGIES) {
     if (attempt !== fetchAttempt) break; // a newer call started
     try {
-      const { price, changeAmt, changePct, volume, ts } = await tryStrategy(strategy, 'ELTX');
+      const { price, changeAmt, changePct, volume, ts, marketCap, dayLow, dayHigh } = await tryStrategy(strategy, 'ELTX');
       if (attempt !== fetchAttempt) break;
       const isFresh = isMarketOpen() !== 'closed';
-      updateElicioUI(price, changeAmt, changePct, volume, ts, isFresh || manual);
+      updateElicioUI(price, changeAmt, changePct, volume, ts, isFresh || manual, marketCap, dayLow, dayHigh);
       success = true;
       break;
     } catch (err) {
@@ -1560,7 +1696,7 @@ async function fetchELTX(manual = false) {
       setLiveBadge('error');
       setEl('eltxLastUpdate', 'No se pudo obtener precio de Yahoo Finance');
       // Fallback estático mientras se depura
-      updateElicioUI(8.04, 0, 0, 0, null, false);
+      updateElicioUI(8.04, 0, 0, 0, null, false, null, null, null);
     }
   }
 
