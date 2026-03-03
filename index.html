@@ -1149,7 +1149,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
     <button class="login-btn" id="loginBtn" onclick="doLogin()">Acceder al Portal →</button>
     <div id="loginErr">Usuario o contraseña incorrectos.</div>
     <div class="login-hint">Usuario: <b>tu nombre en minúsculas</b> · Contraseña: <b>tu email registrado</b></div>
-    <div class="login-foot">🔒 Acceso exclusivo inversores · info@dreamers-vc.com</div>
+    <div class="login-foot">🔒 Acceso exclusivo inversores · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7c15121a133c180e191d11190e0f510a1f521f1311">[email&#160;protected]</a></div>
   </div>
 </div>
 
@@ -1627,7 +1627,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 
 <div id="toast"><span class="ti">✓</span><span id="toastMsg">OK</span></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 "use strict";
 
 // ── Usuarios ─────────────────────────────────────────────────────────────────
@@ -2055,434 +2055,173 @@ window.addEventListener("DOMContentLoaded", function() {
 });
 
 </script>
+
 <script>
-function initDashboard() {
-  var dateEl = document.getElementById('currentDate');
-  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric'});
+// DASHBOARD v3.16.00 — initDashboard() called by openPortal() after login
+const ELTX_SHARES=14668,ELTX_INVESTED=371000,OTHER_INVESTED=735000,OTHER_CURRENT=863000,AUTO_REFRESH_MS=90000;
+let lastKnownData=null,refreshTimer=null,fetchAttempt=0;
 
-// ── Date ─────────────────────────────────────────────────────────────────────
-// date set by initDashboard
+function fmt(n,dec){if(dec===undefined)dec=2;return Number(n).toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec});}
+function fmtMoney(n){var a=Math.abs(n),sg=n<0?'-':'';if(a>=1e6)return sg+'$'+fmt(a/1e6,2)+'M';if(a>=1e3)return sg+'$'+fmt(a/1e3,1)+'K';return sg+'$'+fmt(a,0);}
+function isMarketOpen(){try{var ny=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));var d=ny.getDay(),m=ny.getHours()*60+ny.getMinutes();if(d===0||d===6)return 'closed';if(m>=570&&m<960)return 'open';if(m>=240&&m<570)return 'pre';if(m>=960&&m<1200)return 'post';}catch(_){}return 'closed';}
+function setEl(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 
-// ── Animate bars ──────────────────────────────────────────────────────────────
-const barObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.querySelectorAll('.equity-bar-fill,.aircraft-fill').forEach(bar => {
-        const w = bar.getAttribute('data-width');
-        if (w) bar.style.width = w + '%';
-      });
-    }
+function setLiveBadge(state){
+  var b=document.getElementById('liveBadge');if(!b)return;
+  var MAP={loading:{cls:'loading',color:'#F59E0B',label:'Cargando'},live:{cls:'',color:'#00C896',label:'EN VIVO'},
+    stale:{cls:'stale',color:'#E85A2C',label:'\u00FAltimo dato'},error:{cls:'stale',color:'#E85A2C',label:'Sin conexi\u00F3n'}};
+  var s=MAP[state]||MAP.loading;
+  b.className=('live-badge '+s.cls).trim();
+  b.innerHTML='<span class="live-dot" style="background:'+s.color+'"></span> '+s.label;
+}
+
+function drawPieChart(){
+  var data=[{pct:34.8,color:'#2D5BE3'},{pct:31.6,color:'#A855F7'},{pct:33.5,color:'#00C896'}];
+  var svg=document.getElementById('pieChart');if(!svg)return;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  var cx=80,cy=80,r=68,ir=32,start=0;
+  data.forEach(function(d){
+    var angle=(d.pct/100)*360,gap=2;
+    var sR=(start-90)*Math.PI/180,eR=(start+angle-gap-90)*Math.PI/180;
+    var x1=cx+r*Math.cos(sR),y1=cy+r*Math.sin(sR),x2=cx+r*Math.cos(eR),y2=cy+r*Math.sin(eR);
+    var ix1=cx+ir*Math.cos(sR),iy1=cy+ir*Math.sin(sR),ix2=cx+ir*Math.cos(eR),iy2=cy+ir*Math.sin(eR);
+    var lf=angle>180?1:0;
+    var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d','M'+ix1+','+iy1+' L'+x1+','+y1+' A'+r+','+r+' 0 '+lf+' 1 '+x2+','+y2+' L'+ix2+','+iy2+' A'+ir+','+ir+' 0 '+lf+' 0 '+ix1+','+iy1+' Z');
+    p.setAttribute('fill',d.color);p.style.opacity='0.9';p.style.transition='opacity 0.2s,transform 0.2s';p.style.transformOrigin='80px 80px';
+    p.addEventListener('mouseenter',function(){p.style.opacity='1';p.style.transform='scale(1.03)';});
+    p.addEventListener('mouseleave',function(){p.style.opacity='0.9';p.style.transform='scale(1)';});
+    svg.appendChild(p);start+=angle;
   });
-}, { threshold: 0.2 });
-document.querySelectorAll('.startup-card,.runway-chart').forEach(el => barObserver.observe(el));
-setTimeout(() => {
-  document.querySelectorAll('.equity-bar-fill,.aircraft-fill').forEach(bar => {
-    const w = bar.getAttribute('data-width');
-    if (w) bar.style.width = w + '%';
-  });
-}, 600);
-
-// ── Pie chart ─────────────────────────────────────────────────────────────────
-function drawPieChart() {
-  const data = [
-    { pct: 34.8, color: '#2D5BE3' },
-    { pct: 31.6, color: '#A855F7' },
-    { pct: 33.5, color: '#00C896' },
-  ];
-  const svg = document.getElementById('pieChart');
-  if (!svg) return;
-  while (svg.firstChild) svg.removeChild(svg.firstChild); // clear on re-render
-  const cx = 80, cy = 80, r = 68, ir = 32;
-  let start = 0;
-  data.forEach(d => {
-    const angle = (d.pct / 100) * 360;
-    const gap = 2;
-    const startRad = (start - 90) * Math.PI / 180;
-    const endRad = (start + angle - gap - 90) * Math.PI / 180;
-    const x1 = cx + r * Math.cos(startRad), y1 = cy + r * Math.sin(startRad);
-    const x2 = cx + r * Math.cos(endRad), y2 = cy + r * Math.sin(endRad);
-    const ix1 = cx + ir * Math.cos(startRad), iy1 = cy + ir * Math.sin(startRad);
-    const ix2 = cx + ir * Math.cos(endRad), iy2 = cy + ir * Math.sin(endRad);
-    const large = angle > 180 ? 1 : 0;
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', `M${ix1},${iy1} L${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${ix2},${iy2} A${ir},${ir} 0 ${large} 0 ${ix1},${iy1} Z`);
-    path.setAttribute('fill', d.color);
-    path.style.opacity = '0.9';
-    path.style.transition = 'opacity 0.2s, transform 0.2s';
-    path.style.transformOrigin = '80px 80px';
-    path.addEventListener('mouseenter', () => { path.style.opacity = '1'; path.style.transform = 'scale(1.03)'; });
-    path.addEventListener('mouseleave', () => { path.style.opacity = '0.9'; path.style.transform = 'scale(1)'; });
-    svg.appendChild(path);
-    start += angle;
-  });
-  const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  t.setAttribute('x', cx); t.setAttribute('y', cy + 4);
-  t.setAttribute('text-anchor', 'middle');
-  t.setAttribute('font-family', 'Syne,sans-serif');
-  t.setAttribute('font-size', '13'); t.setAttribute('font-weight', '800');
-  t.setAttribute('fill', '#0F1C3F'); t.textContent = '$1.1M';
-  svg.appendChild(t);
-  const t2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  t2.setAttribute('x', cx); t2.setAttribute('y', cy + 16);
-  t2.setAttribute('text-anchor', 'middle');
-  t2.setAttribute('font-family', 'Inter,sans-serif');
-  t2.setAttribute('font-size', '7');
-  t2.setAttribute('fill', '#8895BB'); t2.textContent = 'INVERTIDO';
-  svg.appendChild(t2);
-}
-  requestAnimationFrame(drawPieChart);
-
-// ═════════════════════════════════════════════════════════════════════════════
-//  ELTX LIVE DATA — Debugged & Robust
-// ═════════════════════════════════════════════════════════════════════════════
-const ELTX_SHARES     = 14668;
-const ELTX_INVESTED   = 371000;
-const OTHER_INVESTED  = 385000 + 350000;   // Oncoheroes + Astrocyte
-const OTHER_CURRENT   = 513000 + 350000;   // Oncoheroes + Astrocyte valores actuales
-const AUTO_REFRESH_MS = 90000;             // 90 s entre refreshes automáticos
-
-let lastKnownData  = null;   // { price, changeAmt, changePct, volume, timestamp }
-let refreshTimer   = null;
-let fetchAttempt   = 0;
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-function fmt(n, dec = 2) {
-  return Number(n).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
-}
-function fmtMoney(n) {
-  const abs = Math.abs(n);
-  const sign = n < 0 ? '-' : '';
-  if (abs >= 1e6) return sign + '$' + fmt(abs / 1e6, 2) + 'M';
-  if (abs >= 1e3) return sign + '$' + fmt(abs / 1e3, 1) + 'K';
-  return sign + '$' + fmt(abs, 0);
-}
-function isMarketOpen() {
-  try {
-    const ny   = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
-    const day  = ny.getDay();
-    const mins = ny.getHours() * 60 + ny.getMinutes();
-    if (day === 0 || day === 6) return 'closed';
-    if (mins >= 570 && mins < 960) return 'open';
-    if (mins >= 240 && mins < 570) return 'pre';
-    if (mins >= 960 && mins < 1200) return 'post';
-  } catch (_) {}
-  return 'closed';
-}
-function setEl(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
-}
-function setLiveBadge(state) {
-  const b = document.getElementById('liveBadge');
-  if (!b) return;
-  const MAP = {
-    loading: { cls: 'loading', color: '#F59E0B', label: 'Cargando' },
-    live:    { cls: '',        color: '#00C896', label: 'EN VIVO'  },
-    stale:   { cls: 'stale',   color: '#E85A2C', label: 'Último dato' },
-    error:   { cls: 'stale',   color: '#E85A2C', label: 'Sin conexión' },
-  };
-  const s = MAP[state] || MAP.loading;
-  b.className = ('live-badge ' + s.cls).trim();
-  b.innerHTML = `<span class="live-dot" style="background:${s.color}"></span> ${s.label}`;
+  var t=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x',cx);t.setAttribute('y',cy+4);t.setAttribute('text-anchor','middle');
+  t.setAttribute('font-family','Syne,sans-serif');t.setAttribute('font-size','13');t.setAttribute('font-weight','800');
+  t.setAttribute('fill','#0F1C3F');t.textContent='$1.1M';svg.appendChild(t);
+  var t2=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t2.setAttribute('x',cx);t2.setAttribute('y',cy+16);t2.setAttribute('text-anchor','middle');
+  t2.setAttribute('font-family','Inter,sans-serif');t2.setAttribute('font-size','7');
+  t2.setAttribute('fill','#8895BB');t2.textContent='INVERTIDO';svg.appendChild(t2);
 }
 
-// ── UI updater ────────────────────────────────────────────────────────────
-function updateElicioUI(price, changeAmt, changePct, volume, dataTimestamp, isFresh, marketCap, dayLow, dayHigh) {
-  const valorActual = price * ELTX_SHARES;
-  const ganancia    = valorActual - ELTX_INVESTED;
-  const roiPct      = (ganancia / ELTX_INVESTED) * 100;
-  const priceStr    = '$' + fmt(price, 2);
-
-  // Precio principal
-  const priceDisp = document.getElementById('eltxPriceDisplay');
-  if (priceDisp) priceDisp.innerHTML = `<strong>${priceStr}</strong>`;
-  setEl('eltxPriceMetric', priceStr);
-
-  // Variación
-  const chgEl = document.getElementById('eltxChangeDisplay');
-  if (chgEl) {
-    const sign = changePct >= 0 ? '+' : '';
-    chgEl.textContent = `${sign}${fmt(changePct, 2)}% (${sign}${fmt(changeAmt, 3)})`;
-    chgEl.className   = 'ticker-change ' + (changePct > 0 ? 'up' : changePct < 0 ? 'down' : 'flat');
-  }
-
-  // Volumen
-  if (volume > 0) {
-    const v = volume >= 1e6 ? fmt(volume / 1e6, 2) + 'M'
-            : volume >= 1e3 ? Math.round(volume / 1e3) + 'K'
-            : String(volume);
-    setEl('eltxVolDisplay', 'Vol: ' + v);
-  }
-
-  // Valor actual
-  const valEl = document.getElementById('eltxValorActual');
-  if (valEl) {
-    valEl.textContent = fmtMoney(valorActual);
-    valEl.className   = 'metric-value ' + (roiPct >= 0 ? 'green' : 'red');
-  }
-
-  // ROI chip
-  const roiEl = document.getElementById('elicioRoiChip');
-  if (roiEl) {
-    const dir   = roiPct >= 0 ? '↑' : '↓';
-    const label = roiPct >= 0 ? 'Beneficio' : 'Pérdida';
-    roiEl.textContent = `${dir} ${roiPct >= 0 ? '+' : ''}${fmt(roiPct, 1)}% ROI · ${label} ${fmtMoney(Math.abs(ganancia))}`;
-    roiEl.className   = 'roi-chip ' + (roiPct >= 0 ? 'up' : 'down');
-  }
-
-  // Runway row
-  const runwayCur = document.getElementById('eltxRunwayCurrent');
-  const runwayRoi = document.getElementById('eltxRunwayRoi');
-  const runwayBar = document.getElementById('eltxRunwayBar');
-  if (runwayCur) {
-    runwayCur.textContent = fmtMoney(valorActual);
-    runwayCur.className   = 'aircraft-current ' + (roiPct >= 0 ? 'gain' : 'loss');
-  }
-  if (runwayRoi) {
-    runwayRoi.textContent = (ganancia >= 0 ? '+' : '') + fmtMoney(ganancia);
-    runwayRoi.className   = 'aircraft-roi ' + (roiPct >= 0 ? 'gain' : 'loss');
-  }
-  if (runwayBar) {
-    const bw = Math.max(5, Math.min(95, 50 + roiPct / 2));
-    runwayBar.setAttribute('data-width', bw.toFixed(0));
-    runwayBar.style.width = bw.toFixed(0) + '%';
-    runwayBar.textContent  = (roiPct >= 0 ? '+' : '') + fmt(roiPct, 1) + '% ✈️';
-    runwayBar.className    = 'aircraft-fill ' + (roiPct >= 0 ? 'track-gain' : 'track-loss');
-  }
-
-  // KPI Portfolio total
-  const totalVal = OTHER_CURRENT + valorActual;
-  const totalInv = OTHER_INVESTED + ELTX_INVESTED;
-  const totalRoi = ((totalVal - totalInv) / totalInv) * 100;
-  const kpiVal   = document.getElementById('kpiPortfolioValue');
-  const kpiDelta = document.getElementById('kpiPortfolioDelta');
-  if (kpiVal) kpiVal.textContent = totalVal >= 1e6 ? '$' + fmt(totalVal / 1e6, 2) + 'M' : '$' + Math.round(totalVal / 1e3) + 'K';
-  if (kpiDelta) {
-    kpiDelta.textContent = (totalRoi >= 0 ? '↑ +' : '↓ ') + fmt(totalRoi, 1) + '% vs invertido';
-    kpiDelta.className   = 'kpi-delta ' + (totalRoi >= 0 ? 'up' : 'down');
-  }
-
-  // Timestamp
-  let tsStr = '—';
-  if (dataTimestamp) {
-    try {
-      tsStr = new Date(dataTimestamp * 1000).toLocaleString('es-ES', {
-        timeZone: 'America/New_York', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      }) + ' NY';
-    } catch (_) { tsStr = new Date(dataTimestamp * 1000).toLocaleTimeString(); }
-  }
-  setEl('eltxLastUpdate', 'Act: ' + tsStr);
-
-  // Market hours indicator
-  const mktStatus = isMarketOpen();
-  const mktEl = document.getElementById('eltxMarketHours');
-  if (mktEl) {
-    const LABELS = { open: '● Abierto', pre: '◐ Pre-mkt', post: '◑ Post-mkt', closed: '○ Cerrado' };
-    mktEl.textContent = LABELS[mktStatus] || '';
-    mktEl.className   = 'elicio-market-hours ' + (mktStatus === 'open' ? 'open' : mktStatus === 'closed' ? 'closed' : 'pre');
-  }
-
-
-  // ── Market Cap ──────────────────────────────────────────────────────────
-  const mcEl = document.getElementById('eltxMarketCap');
-  if (mcEl) {
-    if (marketCap && marketCap > 0) {
-      const mc = marketCap >= 1e9 ? '$' + fmt(marketCap / 1e9, 2) + 'B'
-               : marketCap >= 1e6 ? '$' + fmt(marketCap / 1e6, 1) + 'M'
-               : '$' + fmt(marketCap / 1e3, 0) + 'K';
-      mcEl.textContent = mc;
-    } else {
-      mcEl.textContent = '—';
-    }
-  }
-
-  // ── Day's Range ─────────────────────────────────────────────────────────
-  const drEl     = document.getElementById('eltxDayRange');
-  const cursorEl = document.getElementById('eltxRangeCursor');
-  const lowEl    = document.getElementById('eltxRangeLow');
-  const highEl   = document.getElementById('eltxRangeHigh');
-  if (drEl) {
-    if (dayLow && dayHigh && dayLow > 0 && dayHigh > 0) {
-      drEl.innerHTML =
-        `<span class="range-low">$${fmt(dayLow, 2)}</span>` +
-        `<span class="range-sep">—</span>` +
-        `<span class="range-high">$${fmt(dayHigh, 2)}</span>`;
-      if (lowEl)  lowEl.textContent  = '$' + fmt(dayLow, 2);
-      if (highEl) highEl.textContent = '$' + fmt(dayHigh, 2);
-      if (cursorEl && dayHigh > dayLow) {
-        const pct = Math.max(2, Math.min(98, ((price - dayLow) / (dayHigh - dayLow)) * 100));
-        cursorEl.style.left = pct + '%';
-      }
-    } else {
-      drEl.textContent = '—';
-    }
-  }
-
-  setLiveBadge(isFresh ? 'live' : 'stale');
-  lastKnownData = { price, changeAmt, changePct, volume, timestamp: dataTimestamp };
+function updateElicioUI(price,changeAmt,changePct,volume,dataTimestamp,isFresh,marketCap,dayLow,dayHigh){
+  var val=price*ELTX_SHARES,gan=val-ELTX_INVESTED,roi=(gan/ELTX_INVESTED)*100,ps='$'+fmt(price,2);
+  var pd=document.getElementById('eltxPriceDisplay');if(pd)pd.innerHTML='<strong>'+ps+'</strong>';
+  setEl('eltxPriceMetric',ps);
+  var ce=document.getElementById('eltxChangeDisplay');
+  if(ce){var sg=changePct>=0?'+':'';ce.textContent=sg+fmt(changePct,2)+'% ('+sg+fmt(changeAmt,3)+')';ce.className='ticker-change '+(changePct>0?'up':changePct<0?'down':'flat');}
+  if(volume>0){var vv=volume>=1e6?fmt(volume/1e6,2)+'M':volume>=1e3?Math.round(volume/1e3)+'K':String(volume);setEl('eltxVolDisplay','Vol: '+vv);}
+  var ve=document.getElementById('eltxValorActual');if(ve){ve.textContent=fmtMoney(val);ve.className='metric-value '+(roi>=0?'green':'red');}
+  var re=document.getElementById('elicioRoiChip');
+  if(re){var dir=roi>=0?'\u2191':'\u2193',lbl=roi>=0?'Beneficio':'P\u00E9rdida';re.textContent=dir+' '+(roi>=0?'+':'')+fmt(roi,1)+'% ROI \u00B7 '+lbl+' '+fmtMoney(Math.abs(gan));re.className='roi-chip '+(roi>=0?'up':'down');}
+  var rc=document.getElementById('eltxRunwayCurrent'),rr=document.getElementById('eltxRunwayRoi'),rb=document.getElementById('eltxRunwayBar');
+  if(rc){rc.textContent=fmtMoney(val);rc.className='aircraft-current '+(roi>=0?'gain':'loss');}
+  if(rr){rr.textContent=(gan>=0?'+':'')+fmtMoney(gan);rr.className='aircraft-roi '+(roi>=0?'gain':'loss');}
+  if(rb){var bw=Math.max(5,Math.min(95,50+roi/2));rb.style.width=bw.toFixed(0)+'%';rb.textContent=(roi>=0?'+':'')+fmt(roi,1)+'% \u2708\uFE0F';rb.className='aircraft-fill '+(roi>=0?'track-gain':'track-loss');}
+  var tv=OTHER_CURRENT+val,ti=OTHER_INVESTED+ELTX_INVESTED,tr=((tv-ti)/ti)*100;
+  var kv=document.getElementById('kpiPortfolioValue'),kd=document.getElementById('kpiPortfolioDelta');
+  if(kv)kv.textContent=tv>=1e6?'$'+fmt(tv/1e6,2)+'M':'$'+Math.round(tv/1e3)+'K';
+  if(kd){kd.textContent=(tr>=0?'\u2191 +':'\u2193 ')+fmt(tr,1)+'% vs invertido';kd.className='kpi-delta '+(tr>=0?'up':'down');}
+  var tsStr='\u2014';
+  if(dataTimestamp){try{tsStr=new Date(dataTimestamp*1000).toLocaleString('es-ES',{timeZone:'America/New_York',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+' NY';}catch(_){tsStr=new Date(dataTimestamp*1000).toLocaleTimeString();}}
+  setEl('eltxLastUpdate','Act: '+tsStr);
+  var ms=isMarketOpen(),me=document.getElementById('eltxMarketHours');
+  if(me){var ML={open:'\u25CF Abierto',pre:'\u25D0 Pre-mkt',post:'\u25D1 Post-mkt',closed:'\u25CB Cerrado'};me.textContent=ML[ms]||'';me.className='elicio-market-hours '+(ms==='open'?'open':ms==='closed'?'closed':'pre');}
+  var mc=document.getElementById('eltxMarketCap');
+  if(mc){if(marketCap&&marketCap>0){var mcv=marketCap>=1e9?'$'+fmt(marketCap/1e9,2)+'B':marketCap>=1e6?'$'+fmt(marketCap/1e6,1)+'M':'$'+fmt(marketCap/1e3,0)+'K';mc.textContent=mcv;}else mc.textContent='\u2014';}
+  var dr=document.getElementById('eltxDayRange'),cur=document.getElementById('eltxRangeCursor'),lo=document.getElementById('eltxRangeLow'),hi=document.getElementById('eltxRangeHigh');
+  if(dr){if(dayLow&&dayHigh&&dayLow>0&&dayHigh>0){dr.innerHTML='<span class="range-low">$'+fmt(dayLow,2)+'</span><span class="range-sep">\u2014</span><span class="range-high">$'+fmt(dayHigh,2)+'</span>';if(lo)lo.textContent='$'+fmt(dayLow,2);if(hi)hi.textContent='$'+fmt(dayHigh,2);if(cur&&dayHigh>dayLow){var pct=Math.max(2,Math.min(98,((price-dayLow)/(dayHigh-dayLow))*100));cur.style.left=pct+'%';}}else dr.textContent='\u2014';}
+  setLiveBadge(isFresh?'live':'stale');
+  lastKnownData={price:price,changeAmt:changeAmt,changePct:changePct,volume:volume,timestamp:dataTimestamp};
 }
 
-// ── Parsing helpers (defensive) ──────────────────────────────────────────
-function parseYahooV8(raw) {
-  // raw.chart.result[0]
-  const result = raw?.chart?.result?.[0];
-  if (!result) throw new Error('No chart result');
-  const meta = result.meta;
-  if (!meta) throw new Error('No meta');
-  const price = meta.regularMarketPrice ?? meta.postMarketPrice ?? meta.preMarketPrice;
-  if (!price || price <= 0) throw new Error('Price is zero or missing: ' + JSON.stringify(meta).slice(0, 200));
-  const prev      = meta.chartPreviousClose ?? meta.previousClose ?? meta.regularMarketPreviousClose ?? price;
-  const changeAmt = price - prev;
-  const changePct = prev > 0 ? (changeAmt / prev) * 100 : 0;
-  const volume    = meta.regularMarketVolume ?? 0;
-  const ts        = meta.regularMarketTime ?? Math.floor(Date.now() / 1000);
-  const marketCap = meta.marketCap ?? null;
-  const dayLow    = meta.regularMarketDayLow ?? null;
-  const dayHigh   = meta.regularMarketDayHigh ?? null;
-  return { price, changeAmt, changePct, volume, ts, marketCap, dayLow, dayHigh };
+function parseYahooV8(raw){
+  var res=raw&&raw.chart&&raw.chart.result&&raw.chart.result[0];if(!res)throw new Error('No chart result');
+  var m=res.meta;if(!m)throw new Error('No meta');
+  var pr=m.regularMarketPrice||m.postMarketPrice||m.preMarketPrice;if(!pr||pr<=0)throw new Error('Price missing');
+  var prev=m.chartPreviousClose||m.previousClose||m.regularMarketPreviousClose||pr;
+  var ca=pr-prev,cp=prev>0?(ca/prev)*100:0;
+  return{price:pr,changeAmt:ca,changePct:cp,volume:m.regularMarketVolume||0,ts:m.regularMarketTime||Math.floor(Date.now()/1000),marketCap:m.marketCap||null,dayLow:m.regularMarketDayLow||null,dayHigh:m.regularMarketDayHigh||null};
+}
+function parseYahooV10(raw){
+  var p=raw&&raw.quoteSummary&&raw.quoteSummary.result&&raw.quoteSummary.result[0]&&raw.quoteSummary.result[0].price;if(!p)throw new Error('No price v10');
+  var pr=(p.regularMarketPrice&&p.regularMarketPrice.raw)||(p.postMarketPrice&&p.postMarketPrice.raw);if(!pr||pr<=0)throw new Error('v10 price 0');
+  var prev=(p.regularMarketPreviousClose&&p.regularMarketPreviousClose.raw)||pr;
+  var ca=(p.regularMarketChange&&p.regularMarketChange.raw)||(pr-prev);
+  var cp=(p.regularMarketChangePercent&&p.regularMarketChangePercent.raw)?p.regularMarketChangePercent.raw*100:(ca/prev)*100;
+  return{price:pr,changeAmt:ca,changePct:cp,volume:(p.regularMarketVolume&&p.regularMarketVolume.raw)||0,ts:p.regularMarketTime||Math.floor(Date.now()/1000),marketCap:(p.marketCap&&p.marketCap.raw)||null,dayLow:(p.regularMarketDayLow&&p.regularMarketDayLow.raw)||null,dayHigh:(p.regularMarketDayHigh&&p.regularMarketDayHigh.raw)||null};
 }
 
-function parseYahooV10(raw) {
-  // raw.quoteSummary.result[0].price
-  const p = raw?.quoteSummary?.result?.[0]?.price;
-  if (!p) throw new Error('No price object in v10');
-  const price = p.regularMarketPrice?.raw ?? p.postMarketPrice?.raw;
-  if (!price || price <= 0) throw new Error('v10 price missing');
-  const prev      = p.regularMarketPreviousClose?.raw ?? price;
-  const changeAmt = p.regularMarketChange?.raw ?? (price - prev);
-  const changePct = p.regularMarketChangePercent?.raw ? p.regularMarketChangePercent.raw * 100 : (changeAmt / prev) * 100;
-  const volume    = p.regularMarketVolume?.raw ?? 0;
-  const ts        = p.regularMarketTime ?? Math.floor(Date.now() / 1000);
-  const marketCap = p.marketCap?.raw ?? null;
-  const dayLow    = p.regularMarketDayLow?.raw ?? null;
-  const dayHigh   = p.regularMarketDayHigh?.raw ?? null;
-  return { price, changeAmt, changePct, volume, ts, marketCap, dayLow, dayHigh };
-}
-
-// ── Fetch strategies ─────────────────────────────────────────────────────
-// Each strategy: { name, buildUrl(sym), parse(json) }
-const STRATEGIES = [
-  // 1. allorigins GET wrapper → Yahoo v8 q1
-  { name:'ao/v8-q1',
-    buildUrl: s => 'https://api.allorigins.win/get?url='+encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/'+s+'?interval=1d&range=5d&includePrePost=true'),
-    parse: j => { try { const r = j.contents ? JSON.parse(j.contents) : j; return parseYahooV8(r); } catch(e) { throw new Error('ao/v8-q1 parse: '+e.message); } } },
-  // 2. allorigins raw → Yahoo v8 q2
-  { name:'ao/v8-q2',
-    buildUrl: s => 'https://api.allorigins.win/raw?url='+encodeURIComponent('https://query2.finance.yahoo.com/v8/finance/chart/'+s+'?interval=1d&range=5d&includePrePost=true'),
-    parse: j => { try { return parseYahooV8(j); } catch(e) { throw new Error('ao/v8-q2: '+e.message); } } },
-  // 3. corsproxy.io → Yahoo v8 q1
-  { name:'cors/v8-q1',
-    buildUrl: s => 'https://corsproxy.io/?url='+encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/'+s+'?interval=1d&range=5d&includePrePost=true'),
-    parse: j => { try { return parseYahooV8(j); } catch(e) { throw new Error('cors/v8-q1: '+e.message); } } },
-  // 4. corsproxy.io → Yahoo v8 q2
-  { name:'cors/v8-q2',
-    buildUrl: s => 'https://corsproxy.io/?url='+encodeURIComponent('https://query2.finance.yahoo.com/v8/finance/chart/'+s+'?interval=1d&range=5d'),
-    parse: j => { try { return parseYahooV8(j); } catch(e) { throw new Error('cors/v8-q2: '+e.message); } } },
-  // 5. allorigins → Yahoo v10 quoteSummary
-  { name:'ao/v10',
-    buildUrl: s => 'https://api.allorigins.win/get?url='+encodeURIComponent('https://query1.finance.yahoo.com/v10/finance/quoteSummary/'+s+'?modules=price,summaryDetail'),
-    parse: j => { try { const r = j.contents ? JSON.parse(j.contents) : j; return parseYahooV10(r); } catch(e) { throw new Error('ao/v10: '+e.message); } } },
-  // 6. corsproxy.io → Yahoo v10
-  { name:'cors/v10',
-    buildUrl: s => 'https://corsproxy.io/?url='+encodeURIComponent('https://query2.finance.yahoo.com/v10/finance/quoteSummary/'+s+'?modules=price,summaryDetail'),
-    parse: j => { try { return parseYahooV10(j); } catch(e) { throw new Error('cors/v10: '+e.message); } } },
-  // 7. allorigins → Yahoo v11 (newer endpoint, same structure as v10)
-  { name:'ao/v11',
-    buildUrl: s => 'https://api.allorigins.win/get?url='+encodeURIComponent('https://query1.finance.yahoo.com/v11/finance/quoteSummary/'+s+'?modules=price'),
-    parse: j => { try { const r = j.contents ? JSON.parse(j.contents) : j; return parseYahooV10(r); } catch(e) { throw new Error('ao/v11: '+e.message); } } },
-  // 8. corsproxy.io → Yahoo v11
-  { name:'cors/v11',
-    buildUrl: s => 'https://corsproxy.io/?url='+encodeURIComponent('https://query1.finance.yahoo.com/v11/finance/quoteSummary/'+s+'?modules=price'),
-    parse: j => { try { return parseYahooV10(j); } catch(e) { throw new Error('cors/v11: '+e.message); } } },
-  // 9. Yahoo Finance "spark" mini endpoint via allorigins
-  { name:'ao/spark',
-    buildUrl: s => 'https://api.allorigins.win/get?url='+encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/spark?symbols='+s+'&range=1d&interval=5m'),
-    parse: j => {
-      try {
-        const r = j.contents ? JSON.parse(j.contents) : j;
-        const sp = r?.spark?.result?.[0];
-        if (!sp) throw new Error('No spark result');
-        const meta = sp.response?.[0]?.meta;
-        if (!meta?.regularMarketPrice) throw new Error('No spark price');
-        const price = meta.regularMarketPrice;
-        const prev = meta.chartPreviousClose ?? price;
-        return { price, changeAmt: price-prev, changePct: prev>0?(price-prev)/prev*100:0,
-                 volume: meta.regularMarketVolume??0, ts: meta.regularMarketTime??Math.floor(Date.now()/1000),
-                 marketCap: null, dayLow: meta.regularMarketDayLow??null, dayHigh: meta.regularMarketDayHigh??null };
-      } catch(e) { throw new Error('ao/spark: '+e.message); }
-    }
-  },
-  // 10. thingproxy → Yahoo v8
-  { name:'thing/v8',
-    buildUrl: s => 'https://thingproxy.freeboard.io/fetch/https://query1.finance.yahoo.com/v8/finance/chart/'+s+'?interval=1d&range=5d',
-    parse: j => { try { return parseYahooV8(j); } catch(e) { throw new Error('thing/v8: '+e.message); } } },
+const STRATEGIES=[
+  {name:'ao/v8-q1',buildUrl:function(s){return'https://api.allorigins.win/get?url='+encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/'+s+'?interval=1d&range=5d&includePrePost=true');},parse:function(j){try{var r=j.contents?JSON.parse(j.contents):j;return parseYahooV8(r);}catch(e){throw new Error('ao/v8-q1: '+e.message);}}},
+  {name:'ao/v8-q2',buildUrl:function(s){return'https://api.allorigins.win/raw?url='+encodeURIComponent('https://query2.finance.yahoo.com/v8/finance/chart/'+s+'?interval=1d&range=5d&includePrePost=true');},parse:function(j){try{return parseYahooV8(j);}catch(e){throw new Error('ao/v8-q2: '+e.message);}}},
+  {name:'cors/v8-q1',buildUrl:function(s){return'https://corsproxy.io/?url='+encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/'+s+'?interval=1d&range=5d&includePrePost=true');},parse:function(j){try{return parseYahooV8(j);}catch(e){throw new Error('cors/v8-q1: '+e.message);}}},
+  {name:'cors/v8-q2',buildUrl:function(s){return'https://corsproxy.io/?url='+encodeURIComponent('https://query2.finance.yahoo.com/v8/finance/chart/'+s+'?interval=1d&range=5d');},parse:function(j){try{return parseYahooV8(j);}catch(e){throw new Error('cors/v8-q2: '+e.message);}}},
+  {name:'ao/v10',buildUrl:function(s){return'https://api.allorigins.win/get?url='+encodeURIComponent('https://query1.finance.yahoo.com/v10/finance/quoteSummary/'+s+'?modules=price,summaryDetail');},parse:function(j){try{var r=j.contents?JSON.parse(j.contents):j;return parseYahooV10(r);}catch(e){throw new Error('ao/v10: '+e.message);}}},
+  {name:'cors/v10',buildUrl:function(s){return'https://corsproxy.io/?url='+encodeURIComponent('https://query2.finance.yahoo.com/v10/finance/quoteSummary/'+s+'?modules=price,summaryDetail');},parse:function(j){try{return parseYahooV10(j);}catch(e){throw new Error('cors/v10: '+e.message);}}},
+  {name:'ao/v11',buildUrl:function(s){return'https://api.allorigins.win/get?url='+encodeURIComponent('https://query1.finance.yahoo.com/v11/finance/quoteSummary/'+s+'?modules=price');},parse:function(j){try{var r=j.contents?JSON.parse(j.contents):j;return parseYahooV10(r);}catch(e){throw new Error('ao/v11: '+e.message);}}},
+  {name:'cors/v11',buildUrl:function(s){return'https://corsproxy.io/?url='+encodeURIComponent('https://query1.finance.yahoo.com/v11/finance/quoteSummary/'+s+'?modules=price');},parse:function(j){try{return parseYahooV10(j);}catch(e){throw new Error('cors/v11: '+e.message);}}},
+  {name:'ao/spark',buildUrl:function(s){return'https://api.allorigins.win/get?url='+encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/spark?symbols='+s+'&range=1d&interval=5m');},
+   parse:function(j){try{var r=j.contents?JSON.parse(j.contents):j;var sp=r&&r.spark&&r.spark.result&&r.spark.result[0];if(!sp)throw new Error('No spark');var m=sp.response&&sp.response[0]&&sp.response[0].meta;if(!m||!m.regularMarketPrice)throw new Error('No spark price');var pr=m.regularMarketPrice,pv=m.chartPreviousClose||pr;return{price:pr,changeAmt:pr-pv,changePct:pv>0?(pr-pv)/pv*100:0,volume:m.regularMarketVolume||0,ts:m.regularMarketTime||Math.floor(Date.now()/1000),marketCap:null,dayLow:m.regularMarketDayLow||null,dayHigh:m.regularMarketDayHigh||null};}catch(e){throw new Error('ao/spark: '+e.message);}}},
+  {name:'thing/v8',buildUrl:function(s){return'https://thingproxy.freeboard.io/fetch/https://query1.finance.yahoo.com/v8/finance/chart/'+s+'?interval=1d&range=5d';},parse:function(j){try{return parseYahooV8(j);}catch(e){throw new Error('thing/v8: '+e.message);}}}
 ];
 
-async function tryStrategy(strategy, symbol, timeout = 7000) {
-  const url = strategy.buildUrl(symbol);
-  const ctrl = new AbortController();
-  const tid  = setTimeout(() => ctrl.abort(), timeout);
-  try {
-    const res = await fetch(url, { signal: ctrl.signal, cache: 'no-store' });
+async function tryStrategy(strategy,symbol,timeout){
+  timeout=timeout||7000;
+  var url=strategy.buildUrl(symbol),ctrl=new AbortController(),tid=setTimeout(function(){ctrl.abort();},timeout);
+  try{
+    var res=await fetch(url,{signal:ctrl.signal,cache:'no-store'});
     clearTimeout(tid);
-    if (!res.ok) throw new Error('HTTP ' + res.status + ' from ' + strategy.name);
-    const text = await res.text();
-    let json;
-    try { json = JSON.parse(text); } catch(pe) { throw new Error('Invalid JSON from ' + strategy.name + ': ' + text.slice(0,80)); }
-    const data = strategy.parse(json);
-    if (!data || !data.price || data.price <= 0) throw new Error('Bad price from ' + strategy.name + ': ' + data?.price);
-    console.info('[ELTX] ✓ ' + strategy.name + ' → $' + data.price);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    var text=await res.text(),json;
+    try{json=JSON.parse(text);}catch(pe){throw new Error('Bad JSON: '+text.slice(0,80));}
+    var data=strategy.parse(json);
+    if(!data||!data.price||data.price<=0)throw new Error('Bad price: '+(data&&data.price));
+    console.info('[ELTX] \u2713 '+strategy.name+' \u2192 $'+data.price);
     return data;
-  } catch(e) {
-    clearTimeout(tid);
-    throw e;
-  }
+  }catch(e){clearTimeout(tid);throw e;}
 }
 
-async function fetchELTX(manual = false) {
-  const btn = document.getElementById('refreshBtn');
-  if (btn) btn.classList.add('spinning');
-  setLiveBadge('loading');
-  fetchAttempt++;
-  const attempt = fetchAttempt;
-
-  let success = false;
-  for (const strategy of STRATEGIES) {
-    if (attempt !== fetchAttempt) break; // a newer call started
-    try {
-      const { price, changeAmt, changePct, volume, ts, marketCap, dayLow, dayHigh } = await tryStrategy(strategy, 'ELTX');
-      if (attempt !== fetchAttempt) break;
-      const isFresh = isMarketOpen() !== 'closed';
-      updateElicioUI(price, changeAmt, changePct, volume, ts, isFresh || manual, marketCap, dayLow, dayHigh);
-      try { localStorage.setItem('eltx_last', JSON.stringify({price,changeAmt,changePct,volume,ts,marketCap,dayLow,dayHigh,saved:Date.now()})); } catch(_){}
-      success = true;
-      break;
-    } catch (err) {
-      console.warn(`[ELTX] ✗ ${strategy.name}:`, err.message);
-    }
+async function fetchELTX(manual){
+  manual=!!manual;
+  var btn=document.getElementById('refreshBtn');if(btn)btn.classList.add('spinning');
+  setLiveBadge('loading');fetchAttempt++;var attempt=fetchAttempt,success=false;
+  for(var i=0;i<STRATEGIES.length;i++){
+    if(attempt!==fetchAttempt)break;
+    try{
+      var d=await tryStrategy(STRATEGIES[i],'ELTX');
+      if(attempt!==fetchAttempt)break;
+      var isFresh=isMarketOpen()!=='closed';
+      updateElicioUI(d.price,d.changeAmt,d.changePct,d.volume,d.ts,isFresh||manual,d.marketCap,d.dayLow,d.dayHigh);
+      try{localStorage.setItem('eltx_last',JSON.stringify({price:d.price,changeAmt:d.changeAmt,changePct:d.changePct,volume:d.volume,ts:d.ts,marketCap:d.marketCap,dayLow:d.dayLow,dayHigh:d.dayHigh,saved:Date.now()}));}catch(_){}
+      success=true;break;
+    }catch(err){console.warn('[ELTX] \u2717 '+STRATEGIES[i].name+':',err.message);}
   }
-
-  if (!success && attempt === fetchAttempt) {
-    if (lastKnownData) {
-      setLiveBadge('stale');
-      setEl('eltxLastUpdate', 'Sin conexión — mostrando último dato conocido');
-    } else {
-      try {
-        const cached = JSON.parse(localStorage.getItem('eltx_last') || 'null');
-        if (cached && cached.price) {
-          updateElicioUI(cached.price, cached.changeAmt||0, cached.changePct||0, cached.volume||0,
-            cached.ts||null, false, cached.marketCap||null, cached.dayLow||null, cached.dayHigh||null);
-          const d = new Date(cached.saved);
-          setEl('eltxLastUpdate', 'Caché ' + d.toLocaleDateString('es-ES',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}));
-          setLiveBadge('stale');
-          if (btn) btn.classList.remove('spinning');
-          return;
-        }
-      } catch(_) {}
-      setLiveBadge('error');
-      setEl('eltxLastUpdate', 'Sin conexión con Yahoo Finance');
-    }
+  if(!success&&attempt===fetchAttempt){
+    if(lastKnownData){setLiveBadge('stale');setEl('eltxLastUpdate','Sin conexi\u00F3n \u2014 \u00FAltimo dato');}
+    else{try{var cached=JSON.parse(localStorage.getItem('eltx_last')||'null');
+      if(cached&&cached.price){updateElicioUI(cached.price,cached.changeAmt||0,cached.changePct||0,cached.volume||0,cached.ts||null,false,cached.marketCap||null,cached.dayLow||null,cached.dayHigh||null);
+        var d2=new Date(cached.saved);setEl('eltxLastUpdate','Cach\u00E9 '+d2.toLocaleDateString('es-ES',{month:'short',day:'numeric'})+' '+d2.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}));setLiveBadge('stale');}
+      else{setLiveBadge('error');setEl('eltxLastUpdate','Sin datos disponibles');}}
+    catch(_){setLiveBadge('error');setEl('eltxLastUpdate','Sin datos disponibles');}}
   }
+  if(btn)btn.classList.remove('spinning');
+  if(refreshTimer)clearTimeout(refreshTimer);
+  refreshTimer=setTimeout(function(){fetchELTX(false);},AUTO_REFRESH_MS);
+}
 
-  if (btn) btn.classList.r
+function initDashboard(){
+  var dateEl=document.getElementById('currentDate');
+  if(dateEl)dateEl.textContent=new Date().toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric'});
+  // Bars: IntersectionObserver + immediate fallback (handles already-visible cards)
+  var bo=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.querySelectorAll('.equity-bar-fill,.aircraft-fill').forEach(function(b){var w=b.getAttribute('data-width');if(w)b.style.width=w+'%';});}});},{threshold:0.1});
+  document.querySelectorAll('.startup-card,.runway-chart').forEach(function(el){bo.observe(el);});
+  setTimeout(function(){document.querySelectorAll('.equity-bar-fill,.aircraft-fill').forEach(function(b){var w=b.getAttribute('data-width');if(w)b.style.width=w+'%';});},300);
+  // Pie — double rAF ensures SVG layout is calculated before drawing
+  requestAnimationFrame(function(){requestAnimationFrame(drawPieChart);});
+  // Live price
+  setTimeout(function(){fetchELTX(true);},200);
+}
+</script>
+
+</body>
+</html>
