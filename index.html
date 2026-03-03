@@ -1130,14 +1130,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
     </div>
     <div class="login-title">Dreamers VC</div>
     <div class="login-sub">Portal Inversores · Acceso Restringido</div>
+    <div style="text-align:center;font-size:.6rem;color:rgba(255,255,255,.2);letter-spacing:.12em;margin-top:-.8rem;margin-bottom:1.4rem;font-family:monospace">v3.14.26</div>
     <div class="lf"><label>Usuario</label>
       <input type="text" id="loginUser" placeholder="Tu nombre de usuario" autocomplete="username" autocapitalize="none" spellcheck="false"/></div>
     <div class="lf"><label>Contraseña</label>
-      <input type="password" id="loginPass" placeholder="Tu email registrado" autocomplete="current-password"/></div>
+      <div style="position:relative">
+        <input type="password" id="loginPass" placeholder="Tu email registrado" autocomplete="current-password" style="padding-right:2.8rem"/>
+        <button type="button" onclick="(function(){var i=document.getElementById('loginPass'),b=this;i.type=i.type==='password'?'text':'password';b.textContent=i.type==='password'?'\u{1F441}':'\u{1F648}';})(this)" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:.95rem;line-height:1;opacity:.5;transition:opacity .15s;padding:0" title="Mostrar/ocultar">&#128065;</button>
+      </div></div>
     <button class="login-btn" id="loginBtn" onclick="doLogin()">Acceder al Portal →</button>
     <div id="loginErr">Usuario o contraseña incorrectos.</div>
     <div class="login-hint">Usuario: <b>tu nombre</b> · Contraseña: <b>tu email</b><br>Admin: <b>admin</b> / <b>soytuangel2026</b></div>
-    <div class="login-foot">🔒 Acceso exclusivo inversores · hello@dreamers-vc.com</div>
+    <div class="login-foot">🔒 Acceso exclusivo inversores · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="39515c555556795d4b5c58545c4b4a144f5a175a5654">[email&#160;protected]</a></div>
   </div>
 </div>
 
@@ -1612,7 +1616,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 
 <div id="toast"><span class="ti">✓</span><span id="toastMsg">OK</span></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 "use strict";
 
 var USERS = [
@@ -2454,17 +2458,4 @@ async function fetchELTX(manual = false) {
     }
   }
 
-  if (btn) btn.classList.remove('spinning');
-
-  // Auto-refresh schedule
-  if (refreshTimer) clearTimeout(refreshTimer);
-  refreshTimer = setTimeout(() => fetchELTX(false), AUTO_REFRESH_MS);
-}
-
-// boot deferred
-
-  fetchELTX(true);
-}
-</script>
-</body>
-</html>
+  if (btn) btn.classList.r
