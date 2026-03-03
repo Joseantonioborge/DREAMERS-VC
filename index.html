@@ -1148,8 +1148,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
       </div></div>
     <button class="login-btn" id="loginBtn" onclick="doLogin()">Acceder al Portal →</button>
     <div id="loginErr">Usuario o contraseña incorrectos.</div>
-    <div class="login-hint">Usuario: <b>tu nombre</b> · Contraseña: <b>tu email</b><br>Admin: <b>admin</b> / <b>soytuangel2026</b></div>
-    <div class="login-foot">🔒 Acceso exclusivo inversores · hello@dreamers-vc.com</div>
+    <div class="login-hint">Usuario: <b>tu nombre en minúsculas</b> · Contraseña: <b>tu email registrado</b></div>
+    <div class="login-foot">🔒 Acceso exclusivo inversores · info@dreamers-vc.com</div>
   </div>
 </div>
 
@@ -1627,7 +1627,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
 
 <div id="toast"><span class="ti">✓</span><span id="toastMsg">OK</span></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 "use strict";
 
 // ── Usuarios ─────────────────────────────────────────────────────────────────
@@ -2485,17 +2485,4 @@ async function fetchELTX(manual = false) {
     }
   }
 
-  if (btn) btn.classList.remove('spinning');
-
-  // Auto-refresh schedule
-  if (refreshTimer) clearTimeout(refreshTimer);
-  refreshTimer = setTimeout(() => fetchELTX(false), AUTO_REFRESH_MS);
-}
-
-// boot deferred
-
-  fetchELTX(true);
-}
-</script>
-</body>
-</html>
+  if (btn) btn.classList.r
