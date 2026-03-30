@@ -3202,12 +3202,14 @@ var SU_CONFIG = {
     color:'#2D5BE3', colorBg:'#EEF3FF',
     query:'oncoheroes+biosciences', web:'https://www.oncoheroes.com/',
     metrics: function() {
-      var d = pvGetCurrent('onco');
+      var valComp = (el('oncoValuacion')    || {}).textContent || '—';
+      var eq      = (el('oncoEquityMetric') || {}).textContent || '—';
+      var valAct  = (el('oncoValorActual')  || {}).textContent || '—';
       return [
-        { l:'Valoración',   v: pvFmtBig(d.companyVal) },
+        { l:'Valoración',   v: valComp.trim() },
         { l:'Capital Inv.', v: '$385K' },
-        { l:'Equity',       v: d.equity.toFixed(2)+'%' },
-        { l:'Valor Actual', v: pvFmtMoney(d.current) },
+        { l:'Equity',       v: eq.trim() },
+        { l:'Valor Actual', v: valAct.trim() },
         { l:'Fase',         v: 'Seed 1 · 2020' },
         { l:'Sector',       v: 'Biotech / Oncología' }
       ];
@@ -3218,12 +3220,14 @@ var SU_CONFIG = {
     color:'#A855F7', colorBg:'#FAF0FF',
     query:'astrocyte+pharma', web:'https://www.astrocytepharma.com/',
     metrics: function() {
-      var d = pvGetCurrent('astro');
+      var valComp = (el('astroValuacion')    || {}).textContent || '—';
+      var eq      = (el('astroEquityMetric') || {}).textContent || '—';
+      var valAct  = (el('astroValorActual')  || {}).textContent || '—';
       return [
-        { l:'Valoración',   v: pvFmtBig(d.companyVal) },
+        { l:'Valoración',   v: valComp.trim() },
         { l:'Capital Inv.', v: '$350K' },
-        { l:'Equity',       v: d.equity.toFixed(2)+'%' },
-        { l:'Valor Actual', v: pvFmtMoney(d.current) },
+        { l:'Equity',       v: eq.trim() },
+        { l:'Valor Actual', v: valAct.trim() },
         { l:'Fase',         v: 'Serie A · 2020' },
         { l:'Sector',       v: 'Pharma / Neurología' }
       ];
