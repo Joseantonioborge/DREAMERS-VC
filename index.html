@@ -1636,7 +1636,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
         </div>
         <div class="metric">
           <div class="metric-label">Capital Inv.</div>
-          <div class="metric-value">$371K</div>
+          <div class="metric-value">$546K</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Nº Acciones</div>
+          <div class="metric-value">14.668</div>
         </div>
         <div class="metric">
           <div class="metric-label">Equity</div>
@@ -1746,7 +1750,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
           <div class="aircraft-fill track-loss" id="eltxRunwayBar" data-width="32">— ✈️</div>
         </div>
         <div class="aircraft-stats">
-          <div class="aircraft-invested">Inv. $371,000</div>
+          <div class="aircraft-invested">Inv. $546,146</div>
           <div class="aircraft-current loss" id="eltxRunwayCurrent">—</div>
           <div class="aircraft-roi loss" id="eltxRunwayRoi">—</div>
         </div>
@@ -1764,17 +1768,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
           <div class="legend-item">
             <div class="legend-dot" style="background:#2D5BE3"></div>
             <div class="legend-name">Oncoheroes</div>
-            <div class="legend-pct">34.8%</div>
+            <div class="legend-pct">30.1%</div>
           </div>
           <div class="legend-item">
             <div class="legend-dot" style="background:#A855F7"></div>
             <div class="legend-name">Astrocyte</div>
-            <div class="legend-pct">31.6%</div>
+            <div class="legend-pct">27.3%</div>
           </div>
           <div class="legend-item">
             <div class="legend-dot" style="background:#00C896"></div>
             <div class="legend-name">Elicio</div>
-            <div class="legend-pct">33.5%</div>
+            <div class="legend-pct">42.6%</div>
           </div>
         </div>
       </div>
@@ -1797,7 +1801,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-hei
           <div class="timeline-item">
             <div class="timeline-year">2020 · Ronda 3</div>
             <div class="timeline-companies">Elicio Therapeutics (ELTX)</div>
-            <div class="timeline-amount">$371,000 · SEED · Equity 0.30%</div>
+            <div class="timeline-amount">$546,146 · SEED · Equity 0.30%</div>
           </div>
           <div class="timeline-item">
             <div class="timeline-year">2026 — Próxima</div>
@@ -2609,7 +2613,7 @@ function exportExcel() {
     ["Startup","Sector","Fase","Capital invertido ($)","Valor actual ($)","ROI","Estado"],
     ["Oncoheroes Biosciences","Biotech","Seed 1","385000","513000","+33.2%","Activa"],
     ["Astrocyte Pharma","Pharma","Serie A","350000","350000","0.0%","Activa"],
-    ["Elicio Therapeutics","Therapeutics","Nasdaq (ELTX)","371000","—","Live","Cotiza en Nasdaq"]
+    ["Elicio Therapeutics","Therapeutics","Nasdaq (ELTX)","546146","—","Live","Cotiza en Nasdaq"]
   ];
   function makeMultiSheet(sheets) {
     var xml = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
@@ -3243,7 +3247,10 @@ var SU_CONFIG = {
       var val   = valEl   ? valEl.textContent.replace(/[^\d.$KMB.]/g,'').trim()   : '—';
       return [
         { l:'Ticker',       v: 'NASDAQ: ELTX' },
-        { l:'Capital Inv.', v: '$371K' },
+        { l:'Capital Inv.', v: '$546.146' },
+        { l:'Ticket 1',     v: '$371.379,28' },
+        { l:'Ticket 2',     v: '$174.766,72' },
+        { l:'Nº Acciones',  v: '14.668' },
         { l:'Equity',       v: '0.30%' },
         { l:'Valor Actual', v: val || '—' },
         { l:'Fase',         v: 'Nasdaq · 2020' },
@@ -3538,7 +3545,7 @@ window.addEventListener("DOMContentLoaded", function() {
 
 <script>
 // DASHBOARD v3.29.01 — initDashboard() called by openPortal() after login
-const ELTX_SHARES=14668,ELTX_INVESTED=371000,OTHER_INVESTED=735000,OTHER_CURRENT=863000,AUTO_REFRESH_MS=90000;
+const ELTX_SHARES=14668,ELTX_INVESTED=546146,OTHER_INVESTED=735000,OTHER_CURRENT=863000,AUTO_REFRESH_MS=90000;
 let lastKnownData=null,refreshTimer=null,fetchAttempt=0;
 
 function toggleEltxChart(){
@@ -3572,7 +3579,7 @@ function setLiveBadge(state){
 }
 
 function drawPieChart(){
-  var data=[{pct:34.8,color:'#2D5BE3'},{pct:31.6,color:'#A855F7'},{pct:33.5,color:'#00C896'}];
+  var data=[{pct:30.1,color:'#2D5BE3'},{pct:27.3,color:'#A855F7'},{pct:42.6,color:'#00C896'}];
   var svg=document.getElementById('pieChart');if(!svg)return;
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   var cx=80,cy=80,r=68,ir=32,start=0;
@@ -3592,7 +3599,7 @@ function drawPieChart(){
   var t=document.createElementNS('http://www.w3.org/2000/svg','text');
   t.setAttribute('x',cx);t.setAttribute('y',cy+4);t.setAttribute('text-anchor','middle');
   t.setAttribute('font-family','Syne,sans-serif');t.setAttribute('font-size','13');t.setAttribute('font-weight','800');
-  t.setAttribute('fill','#0F1C3F');t.textContent='$1.1M';svg.appendChild(t);
+  t.setAttribute('fill','#0F1C3F');t.textContent='$1.3M';svg.appendChild(t);
   var t2=document.createElementNS('http://www.w3.org/2000/svg','text');
   t2.setAttribute('x',cx);t2.setAttribute('y',cy+16);t2.setAttribute('text-anchor','middle');
   t2.setAttribute('font-family','Inter,sans-serif');t2.setAttribute('font-size','7');
